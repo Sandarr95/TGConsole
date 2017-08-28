@@ -22,7 +22,7 @@ public class TGself extends TelegramLongPollingBot {
 		return Configos.botToken;
 	}
   
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings({ "deprecation", "resource" })
 	@Override
 	public void onUpdateReceived(Update update){
 		Main.debug("got update;");
