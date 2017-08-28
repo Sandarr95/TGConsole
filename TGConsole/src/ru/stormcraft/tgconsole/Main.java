@@ -23,7 +23,7 @@ public class Main extends JavaPlugin {
 	public static HashMap<String, String> locale;
 	@Override
 	public void onEnable() {
-		tfolder = getDataFolder();
+		tfolder = this.getDataFolder();
 		clearLog();
 		loadConfigs();
     
@@ -59,6 +59,7 @@ public class Main extends JavaPlugin {
 	}
   
 	static void clearLog() {
+		try{
 		String pat = tfolder.getAbsolutePath().replace("\\" + tfolder.getPath(), "");
 		File folder = new File(pat);
 		File[] files = folder.listFiles();
@@ -70,7 +71,10 @@ public class Main extends JavaPlugin {
 			if ((file.getName().contains("templog")) && (!file.delete())) {
 				debug("Can't remove " + file.getAbsolutePath());
 			}
-    	}	
+    	}
+		}catch(NullPointerException e){
+			debug("Unknown error, wow.");
+		}
 	}
   
 	public void loadConfigs() {
