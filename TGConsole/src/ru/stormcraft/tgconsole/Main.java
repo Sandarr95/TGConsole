@@ -16,15 +16,10 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.glassfish.jersey.server.spi.internal.ValueFactoryProvider.Priority;
 import org.telegram.telegrambots.ApiContextInitializer;
 import org.telegram.telegrambots.TelegramBotsApi;
-import org.telegram.telegrambots.api.methods.BotApiMethod;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
-import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
-import org.telegram.telegrambots.exceptions.TelegramApiRequestException;
-import org.telegram.telegrambots.updateshandlers.SentCallback;
 
 public class Main extends JavaPlugin implements Listener {
 	static List<String> admins;
@@ -59,7 +54,7 @@ public class Main extends JavaPlugin implements Listener {
 					Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "|----------------------------------------|");
 					Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "|  Successfully started the remote bot!  |");
 					Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "|----------------------------------------|");
-					if(getConfig().getBoolean("notify.sendServerStart")){
+					if(getConfig().getBoolean("notify.sendServerStart")&&getConfig().getBoolean("notify.enabled")){
 						sendAll(bot,locale.get("notifyStart"),this);
 					}
 					
@@ -79,9 +74,9 @@ public class Main extends JavaPlugin implements Listener {
 			getLogger().info("TG Console: disabled from configs!");
 		}
 	}
+	@SuppressWarnings("deprecation")
 	@Override
 	public void onDisable() {
-		
 		if(getConfig().getBoolean("notify.sendServerShutdown")){
 			//sendAll(bot,locale.get("notifyShutdown"),this);
 			for(long user_id:ids){
@@ -127,6 +122,10 @@ public class Main extends JavaPlugin implements Listener {
 		getConfig().addDefault("token", "YOUR_BOT_TOKEN");
 		getConfig().addDefault("botName", "YOUR_BOT_NAME");
 		getConfig().addDefault("delay", 10000);
+		ArrayList<String> adminss = new ArrayList<String>();
+		adminss.add("@SPC_Azim");
+		getConfig().addDefault("admins", adminss);
+		
 		getConfig().addDefault("locale.Admin", "Admin:");
 		getConfig().addDefault("locale.Action", "Action:");
 		getConfig().addDefault("locale.commandOutput", "Command Output:");
@@ -135,7 +134,17 @@ public class Main extends JavaPlugin implements Listener {
 		getConfig().addDefault("locale.nothingHappened", "Nothing happened.");
 		getConfig().addDefault("locale.serverStart", "Server is now working!");
 		getConfig().addDefault("locale.serverShutdown", "Server is shutting down=(");
+		
+		getConfig().addDefault("locale.onJoin", "JOINED_MSG");
+		getConfig().addDefault("locale.onLeave", "LEAVE_MSG");
+		getConfig().addDefault("locale.onDeath", "DEATH_MSG");
+		getConfig().addDefault("locale.onChat", "PLAYER : MESSAGE");
+		getConfig().addDefault("locale.onCommand", "PLAYER : COMMAND");
+		
 		getConfig().addDefault("notify.enabled", false);
+		ArrayList<Long> idss = new ArrayList<Long>();
+		idss.add((long) 0);
+		getConfig().addDefault("notify.ids", idss);
 		getConfig().addDefault("notify.sendOnJoinLeave", false);
 		getConfig().addDefault("notify.sendOnDeath", false);
 		getConfig().addDefault("notify.sendChat", false);
@@ -143,19 +152,14 @@ public class Main extends JavaPlugin implements Listener {
 		getConfig().addDefault("notify.sendServerShutdown", false);
 		getConfig().addDefault("notify.sendCommands", false);
 		
-		ArrayList<Long> idss = new ArrayList<Long>();
-		idss.add((long) 0);
-		getConfig().addDefault("notify.ids", idss);
 		
-		ArrayList<String> adminss = new ArrayList<String>();
-		adminss.add("@SPC_Azim");
-		getConfig().addDefault("admins", adminss);
+		
+		
 		getConfig().options().copyDefaults(true);
 		saveConfig();
 		
 		botName = getConfig().getString("botName");
 		botToken = getConfig().getString("token");
-		
 		admins = getConfig().getStringList("admins");
 		ids = getConfig().getLongList("notify.ids");
 		
@@ -172,6 +176,11 @@ public class Main extends JavaPlugin implements Listener {
 		locale.put("nothingHappened", getConfig().getString("locale.nothingHappened"));
 		locale.put("notifyShutdown", getConfig().getString("locale.serverShutdown"));
 		locale.put("notifyStart", getConfig().getString("locale.serverStart"));
+		locale.put("notifyJoin", getConfig().getString("locale.onJoin"));
+		locale.put("notifyLeave", getConfig().getString("locale.onLeave"));
+		locale.put("notifyDeath", getConfig().getString("locale.onDeath"));
+		locale.put("notifyChat", getConfig().getString("locale.onChat"));
+		locale.put("notifyCMD", getConfig().getString("locale.onCommand"));
 	}
   
   	public static void debug(String msng){
@@ -201,31 +210,36 @@ public class Main extends JavaPlugin implements Listener {
   	@EventHandler(priority = EventPriority.LOW)
 	public void onJoin(PlayerJoinEvent e){
   		if(getConfig().getBoolean("notify.sendOnJoinLeave") && getConfig().getBoolean("notify.enabled")){
-  			sendAll(bot,"`"+e.getJoinMessage()+"`",this);
+  			String msg = locale.get("notifyJoin").replace("JOINED_MSG", e.getJoinMessage()).replace("PLAYER", e.getPlayer().getName()).replace("`", "");
+  			sendAll(bot,"`"+msg+"`",this);
   		}
   	}
   	@EventHandler(priority = EventPriority.LOW)
   	public void onLeave(PlayerQuitEvent e){
   		if(getConfig().getBoolean("notify.sendOnJoinLeave") && getConfig().getBoolean("notify.enabled")){
-  			sendAll(bot,"`"+e.getQuitMessage()+"`",this);
+  			String msg = locale.get("notifyLeave").replace("LEAVE_MSG", e.getQuitMessage()).replace("PLAYER", e.getPlayer().getName()).replace("`", "");
+  			sendAll(bot,"`"+msg+"`",this);
   		}
   	}
   	@EventHandler(priority = EventPriority.LOW)
   	public void onDeath(PlayerDeathEvent e){
   		if(getConfig().getBoolean("notify.sendOnDeath") && getConfig().getBoolean("notify.enabled")){
-  			sendAll(bot,"`"+e.getDeathMessage()+"`",this);
+  			String msg = locale.get("notifyDeath").replace("DEATH_MSG", e.getDeathMessage()).replace("PLAYER", e.getEntity().getName()).replace("`", "");
+  			sendAll(bot,"`"+msg+"`",this);
   		}
   	}
   	@EventHandler(priority = EventPriority.LOW)
   	public void onChat(AsyncPlayerChatEvent e){
   		if(getConfig().getBoolean("notify.sendChat") && getConfig().getBoolean("notify.enabled")){
-  			sendAll(bot,"`"+e.getPlayer().getDisplayName()+" : "+e.getMessage()+"`",this);
+  			String msg = locale.get("notifyChat").replace("MESSAGE", e.getMessage()).replace("PLAYER", e.getPlayer().getName()).replace("`", "");
+  			sendAll(bot,"`"+msg+"`",this);
   		}
   	}
   	@EventHandler(priority = EventPriority.LOW)
   	public void onCmd(PlayerCommandPreprocessEvent e){
   		if(getConfig().getBoolean("notify.sendCommands") && getConfig().getBoolean("notify.enabled")){
-  			sendAll(bot,"`"+e.getPlayer().getDisplayName()+" : "+e.getMessage()+"`", this);
+  			String msg = locale.get("notifyCMD").replace("COMMAND", e.getMessage()).replace("PLAYER", e.getPlayer().getName()).replace("`", "");
+  			sendAll(bot,"`"+msg+"`", this);
   		}
   	}
 }

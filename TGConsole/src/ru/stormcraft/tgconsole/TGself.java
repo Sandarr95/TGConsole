@@ -8,10 +8,8 @@ import java.util.Scanner;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.ConsoleCommandSender;
-import org.telegram.telegrambots.TelegramBotsApi;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.objects.Update;
-import org.telegram.telegrambots.bots.AbsSender;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
 
@@ -32,6 +30,14 @@ public class TGself extends TelegramLongPollingBot {
 		if ((update.hasMessage()) && (update.getMessage().hasText())){
 			Main.debug("it have text;");
 			if (update.getMessage().getText().startsWith("/start")) {
+				return;
+			}
+			if (update.getMessage().getText().startsWith("/getid")) {
+				try{
+					sendMessage(getid(update));
+				} catch (TelegramApiException e){
+					e.printStackTrace();
+				}
 				return;
 			}
 			if (Main.admins.contains( update.getMessage().getChatId().toString())||Main.admins.contains(update.getMessage().getChat().getUserName())||Main.admins.contains("@"+update.getMessage().getChat().getUserName())){
@@ -77,11 +83,7 @@ public class TGself extends TelegramLongPollingBot {
 				
 			}else{
 				Main.debug("not an admin;");
-				try{
-					sendMessage(getid(update));
-				} catch (TelegramApiException e){
-					e.printStackTrace();
-				}
+				
 			}
 		}
 	}
@@ -134,7 +136,7 @@ public class TGself extends TelegramLongPollingBot {
 	}
 	public SendMessage getid(Update update){
 		SendMessage message;
-		if ((update.getMessage().hasText()) && (update.getMessage().getText().startsWith("getid")) && (Main.sendids)){
+		if ((update.getMessage().hasText()) && (update.getMessage().getText().startsWith("/getid")) && (Main.sendids)){
 			String replace = "`" + update.getMessage().getChatId() + "`";
 			message = new SendMessage().setChatId(update.getMessage().getChatId()).setText((Main.locale.get("getid")).replace("USER_ID", replace).replace("NEW_LINE", System.lineSeparator())).enableMarkdown(true);
 		}else{
