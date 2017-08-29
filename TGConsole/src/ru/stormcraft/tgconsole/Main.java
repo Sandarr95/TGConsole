@@ -61,18 +61,18 @@ public class Main extends JavaPlugin {
   
 	static void clearLog() {
 		try{
-		String pat = tfolder.getAbsolutePath().replace("\\" + tfolder.getPath(), "");
-		File folder = new File(pat);
-		File[] files = folder.listFiles();
-		debug("Files in the main folder: " + files.length);
-		File[] arrayOfFile1;
-		int j = (arrayOfFile1 = files).length;
-		for (int i = 0; i < j; i++){
-			File file = arrayOfFile1[i];
-			if ((file.getName().contains("templog")) && (!file.delete())) {
-				debug("Can't remove " + file.getAbsolutePath());
+			String pat = tfolder.getAbsolutePath().replace("\\" + tfolder.getPath(), "");
+			File folder = new File(pat);
+			File[] files = folder.listFiles();
+			debug("Files in the main folder: " + files.length);
+			File[] arrayOfFile1;
+			int j = (arrayOfFile1 = files).length;
+			for (int i = 0; i < j; i++){
+				File file = arrayOfFile1[i];
+				if ((file.getName().contains("templog")) && (!file.delete())) {
+					debug("Can't remove " + file.getAbsolutePath());
+				}
 			}
-    	}
 		}catch(NullPointerException e){
 			debug("Unknown error, wow.");
 			if(debug){
@@ -94,6 +94,7 @@ public class Main extends JavaPlugin {
 		getConfig().addDefault("locale.commandOutput", "Command Output:");
 		getConfig().addDefault("locale.unknownCommand", "Unknown command!");
 		getConfig().addDefault("locale.getid", "Your personal id is: USER_ID NEW_LINE (Click the number to copy)");
+		getConfig().addDefault("locale.nothingHappened", "Nothing happened.");
     
 		ArrayList<String> adminss = new ArrayList<String>();
 		adminss.add("@SPC_Azim");
@@ -116,6 +117,7 @@ public class Main extends JavaPlugin {
 		locale.put("commandOutput", getConfig().getString("locale.commandOutput"));
 		locale.put("unknownCommand", getConfig().getString("locale.unknownCommand"));
 		locale.put("getid", getConfig().getString("locale.getid"));
+		locale.put("nothingHappened", getConfig().getString("locale.nothingHappened"));
 	}
   
   	public static void debug(String msng){
