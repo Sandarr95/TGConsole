@@ -8,8 +8,10 @@ import java.util.Scanner;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.ConsoleCommandSender;
+import org.telegram.telegrambots.TelegramBotsApi;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.objects.Update;
+import org.telegram.telegrambots.bots.AbsSender;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
 
@@ -139,12 +141,5 @@ public class TGself extends TelegramLongPollingBot {
 			message = new SendMessage().setChatId(update.getMessage().getChatId()).setText(Main.locale.get("unknownCommand"));
 		}
 		return message;
-	}
-	public static void sendAll(String notify){
-		
-		
-		
-		
-		
 	}
 }

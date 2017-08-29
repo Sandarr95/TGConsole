@@ -7,21 +7,36 @@ import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.glassfish.jersey.server.spi.internal.ValueFactoryProvider.Priority;
 import org.telegram.telegrambots.ApiContextInitializer;
 import org.telegram.telegrambots.TelegramBotsApi;
+import org.telegram.telegrambots.api.methods.BotApiMethod;
+import org.telegram.telegrambots.api.methods.send.SendMessage;
+import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
+import org.telegram.telegrambots.exceptions.TelegramApiRequestException;
+import org.telegram.telegrambots.updateshandlers.SentCallback;
 
-public class Main extends JavaPlugin {
+public class Main extends JavaPlugin implements Listener {
 	static List<String> admins;
+	static List<Long> ids;
 	static boolean sendids = true;
 	static boolean debug;
 	static File tfolder;
+	TGself bot;
 	public static String botName = "test";
 	public static String botToken = "resd";
 	public static long delay;
 	public static HashMap<String, String> locale;
-	static boolean useUsernames;
 	@Override
 	public void onEnable() {
 		tfolder = this.getDataFolder();
@@ -34,10 +49,20 @@ public class Main extends JavaPlugin {
 				try{
 					ApiContextInitializer.init();
 					TelegramBotsApi botsApi = new TelegramBotsApi();
-					botsApi.registerBot(new TGself());
+					bot = new TGself();
+					botsApi.registerBot(bot);
+					
+					if(getConfig().getBoolean("notify.enabled")){
+						Bukkit.getPluginManager().registerEvents(this, this);
+					}
+					
 					Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "|----------------------------------------|");
 					Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "|  Successfully started the remote bot!  |");
 					Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "|----------------------------------------|");
+					if(getConfig().getBoolean("notify.sendServerStart")){
+						sendAll(bot,locale.get("notifyStart"),this);
+					}
+					
 				}catch (TelegramApiException e){
 					Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "|----------------------------------------------|");
 					Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "| Fatal Error Occured while enabling TGConsole,|");
@@ -56,6 +81,19 @@ public class Main extends JavaPlugin {
 	}
 	@Override
 	public void onDisable() {
+		
+		if(getConfig().getBoolean("notify.sendServerShutdown")){
+			//sendAll(bot,locale.get("notifyShutdown"),this);
+			for(long user_id:ids){
+				SendMessage message = new SendMessage().setChatId(user_id).setText(locale.get("notifyShutdown")).enableMarkdown(true);
+				try {
+					bot.sendMessage(message);
+					Thread.sleep(500);
+				} catch (TelegramApiException | InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 		getLogger().info("Disabled TGConsole!");
 	}
   
@@ -95,7 +133,20 @@ public class Main extends JavaPlugin {
 		getConfig().addDefault("locale.unknownCommand", "Unknown command!");
 		getConfig().addDefault("locale.getid", "Your personal id is: USER_ID NEW_LINE (Click the number to copy)");
 		getConfig().addDefault("locale.nothingHappened", "Nothing happened.");
-    
+		getConfig().addDefault("locale.serverStart", "Server is now working!");
+		getConfig().addDefault("locale.serverShutdown", "Server is shutting down=(");
+		getConfig().addDefault("notify.enabled", false);
+		getConfig().addDefault("notify.sendOnJoinLeave", false);
+		getConfig().addDefault("notify.sendOnDeath", false);
+		getConfig().addDefault("notify.sendChat", false);
+		getConfig().addDefault("notify.sendServerStart", false);
+		getConfig().addDefault("notify.sendServerShutdown", false);
+		getConfig().addDefault("notify.sendCommands", false);
+		
+		ArrayList<Long> idss = new ArrayList<Long>();
+		idss.add((long) 0);
+		getConfig().addDefault("notify.ids", idss);
+		
 		ArrayList<String> adminss = new ArrayList<String>();
 		adminss.add("@SPC_Azim");
 		getConfig().addDefault("admins", adminss);
@@ -106,6 +157,7 @@ public class Main extends JavaPlugin {
 		botToken = getConfig().getString("token");
 		
 		admins = getConfig().getStringList("admins");
+		ids = getConfig().getLongList("notify.ids");
 		
 		sendids = getConfig().getBoolean("sendids");
 		debug = getConfig().getBoolean("debug");
@@ -118,11 +170,62 @@ public class Main extends JavaPlugin {
 		locale.put("unknownCommand", getConfig().getString("locale.unknownCommand"));
 		locale.put("getid", getConfig().getString("locale.getid"));
 		locale.put("nothingHappened", getConfig().getString("locale.nothingHappened"));
+		locale.put("notifyShutdown", getConfig().getString("locale.serverShutdown"));
+		locale.put("notifyStart", getConfig().getString("locale.serverStart"));
 	}
   
   	public static void debug(String msng){
   		if (debug) {
   			Bukkit.getLogger().info(msng);
+  		}
+  	}
+  	@SuppressWarnings("deprecation")
+	static void sendAll(TGself bot, String notify, JavaPlugin plugin){
+  		Bukkit.getScheduler().scheduleAsyncDelayedTask(plugin, new Runnable(){
+			@Override
+			public void run() {
+				for(long user_id:ids){
+					SendMessage message = new SendMessage().setChatId(user_id).setText(notify.replaceAll("§.", "")).enableMarkdown(true);
+					try {
+						bot.sendMessage(message);
+						Thread.sleep(500);
+					} catch (TelegramApiException | InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+  		});
+  		
+  	}
+  	
+  	@EventHandler(priority = EventPriority.LOW)
+	public void onJoin(PlayerJoinEvent e){
+  		if(getConfig().getBoolean("notify.sendOnJoinLeave") && getConfig().getBoolean("notify.enabled")){
+  			sendAll(bot,"`"+e.getJoinMessage()+"`",this);
+  		}
+  	}
+  	@EventHandler(priority = EventPriority.LOW)
+  	public void onLeave(PlayerQuitEvent e){
+  		if(getConfig().getBoolean("notify.sendOnJoinLeave") && getConfig().getBoolean("notify.enabled")){
+  			sendAll(bot,"`"+e.getQuitMessage()+"`",this);
+  		}
+  	}
+  	@EventHandler(priority = EventPriority.LOW)
+  	public void onDeath(PlayerDeathEvent e){
+  		if(getConfig().getBoolean("notify.sendOnDeath") && getConfig().getBoolean("notify.enabled")){
+  			sendAll(bot,"`"+e.getDeathMessage()+"`",this);
+  		}
+  	}
+  	@EventHandler(priority = EventPriority.LOW)
+  	public void onChat(AsyncPlayerChatEvent e){
+  		if(getConfig().getBoolean("notify.sendChat") && getConfig().getBoolean("notify.enabled")){
+  			sendAll(bot,"`"+e.getPlayer().getDisplayName()+" : "+e.getMessage()+"`",this);
+  		}
+  	}
+  	@EventHandler(priority = EventPriority.LOW)
+  	public void onCmd(PlayerCommandPreprocessEvent e){
+  		if(getConfig().getBoolean("notify.sendCommands") && getConfig().getBoolean("notify.enabled")){
+  			sendAll(bot,"`"+e.getPlayer().getDisplayName()+" : "+e.getMessage()+"`", this);
   		}
   	}
 }
