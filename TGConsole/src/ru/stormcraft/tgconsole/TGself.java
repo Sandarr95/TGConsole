@@ -31,7 +31,7 @@ public class TGself extends TelegramLongPollingBot {
 			if (update.getMessage().getText().startsWith("/start")) {
 				return;
 			}
-			if (Main.ids.contains(update.getMessage().getChatId())){
+			if (Main.admins.contains( update.getMessage().getChatId().toString())||Main.admins.contains(update.getMessage().getChat().getUserName())||Main.admins.contains("@"+update.getMessage().getChat().getUserName())){
 				Main.debug("one of the admins - " + update.getMessage().getChatId() + " ;");
 				Bukkit.getLogger().info(Main.locale.get("Admin") + " " + update.getMessage().getChat().getFirstName() + " " + update.getMessage().getChat().getLastName() + " @" + update.getMessage().getChat().getUserName());
 				Bukkit.getLogger().info(Main.locale.get("Action") + " " + update.getMessage().getText());

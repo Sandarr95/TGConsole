@@ -13,7 +13,7 @@ import org.telegram.telegrambots.TelegramBotsApi;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
 
 public class Main extends JavaPlugin {
-	static List<Long> ids = null;
+	static List<String> admins;
 	static boolean sendids = true;
 	static boolean debug;
 	static File tfolder;
@@ -21,6 +21,7 @@ public class Main extends JavaPlugin {
 	public static String botToken = "resd";
 	public static long delay;
 	public static HashMap<String, String> locale;
+	static boolean useUsernames;
 	@Override
 	public void onEnable() {
 		tfolder = this.getDataFolder();
@@ -74,6 +75,10 @@ public class Main extends JavaPlugin {
     	}
 		}catch(NullPointerException e){
 			debug("Unknown error, wow.");
+			if(debug){
+				e.printStackTrace();
+				Bukkit.getConsoleSender().sendMessage(ChatColor.RED +"Shortly: "+e.getMessage());
+			}
 		}
 	}
   
@@ -90,19 +95,21 @@ public class Main extends JavaPlugin {
 		getConfig().addDefault("locale.unknownCommand", "Unknown command!");
 		getConfig().addDefault("locale.getid", "Your personal id is: USER_ID NEW_LINE (Click the number to copy)");
     
-		ArrayList<Long> admins = new ArrayList<Long>();
-		admins.add((long) 0);
-		admins.add((long) 1);
-		getConfig().addDefault("adminids", admins);
+		ArrayList<String> adminss = new ArrayList<String>();
+		adminss.add("@SPC_Azim");
+		getConfig().addDefault("admins", adminss);
 		getConfig().options().copyDefaults(true);
 		saveConfig();
-    
+		
 		botName = getConfig().getString("botName");
 		botToken = getConfig().getString("token");
-		ids = getConfig().getLongList("adminids");
+		
+		admins = getConfig().getStringList("admins");
+		
 		sendids = getConfig().getBoolean("sendids");
 		debug = getConfig().getBoolean("debug");
 		delay = getConfig().getLong("delay");
+		
 		locale = new HashMap<String, String>();
 		locale.put("Admin", getConfig().getString("locale.Admin"));
 		locale.put("Action", getConfig().getString("locale.Action"));
