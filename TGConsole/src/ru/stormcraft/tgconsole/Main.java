@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -67,6 +68,28 @@ public class Main extends JavaPlugin implements Listener {
 					if(getConfig().getBoolean("notify.sendServerStart")&&getConfig().getBoolean("notify.enabled")){
 						sendAll(bot,locale.get("notifyStart"),this);
 					}
+					
+					Metrics metrics = new Metrics(this);
+					metrics.addCustomChart(new Metrics.SimplePie("notify_usage", new Callable<String>() {
+			            @Override
+			            public String call() throws Exception {
+			            	if(getConfig().getBoolean("notify.enabled")){
+			            		return "enabled";
+			            	}else{
+			            		return "disabled";
+			            	}
+			            }
+			        }));
+					metrics.addCustomChart(new Metrics.SimplePie("menu_usage", new Callable<String>() {
+			            @Override
+			            public String call() throws Exception {
+			            	if(getConfig().getBoolean("menu.enabled")){
+			            		return "enabled";
+			            	}else{
+			            		return "disabled";
+			            	}
+			            }
+			        }));
 					
 				}catch (TelegramApiException e){
 					Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "|----------------------------------------------|");
@@ -160,13 +183,8 @@ public class Main extends JavaPlugin implements Listener {
 		defaultMenuCommands1.add("command:1");
 		getConfig().addDefault("menu.row1", defaultMenuCommands1);
 		ArrayList<String> defaultMenuCommands2 = new ArrayList<String>();
-		defaultMenuCommands2.add("command:2");
-		defaultMenuCommands2.add("command:3");
 		getConfig().addDefault("menu.row2", defaultMenuCommands2);
 		ArrayList<String> defaultMenuCommands3 = new ArrayList<String>();
-		defaultMenuCommands3.add("command:4");
-		defaultMenuCommands3.add("command:5");  //don't look at these defaults
-		defaultMenuCommands3.add("command:6");
 		getConfig().addDefault("menu.row3", defaultMenuCommands3);
 		
 		getConfig().addDefault("notify.enabled", false);
