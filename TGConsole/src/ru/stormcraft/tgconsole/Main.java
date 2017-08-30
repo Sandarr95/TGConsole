@@ -7,6 +7,9 @@ import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -21,6 +24,8 @@ import org.telegram.telegrambots.TelegramBotsApi;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
+import org.telegram.telegrambots.exceptions.TelegramApiRequestException;
+import org.telegram.telegrambots.generics.BotSession;
 
 public class Main extends JavaPlugin implements Listener {
 	static List<String> admins;
@@ -30,6 +35,8 @@ public class Main extends JavaPlugin implements Listener {
 	static boolean menu;
 	static File tfolder;
 	TGself bot;
+	TelegramBotsApi botsApi;
+	BotSession session;
 	static List<KeyboardRow> keyboard;
 	public static String botName = "test";
 	public static String botToken = "resd";
@@ -46,9 +53,9 @@ public class Main extends JavaPlugin implements Listener {
 			if ((!botName.equals("YOUR_BOT_NAME")) && (!botToken.equals("YOUR_TOKEN_NAME"))) {
 				try{
 					ApiContextInitializer.init();
-					TelegramBotsApi botsApi = new TelegramBotsApi();
+					botsApi = new TelegramBotsApi();
 					bot = new TGself();
-					botsApi.registerBot(bot);
+					session = botsApi.registerBot(bot);
 					
 					if(getConfig().getBoolean("notify.enabled")){
 						Bukkit.getPluginManager().registerEvents(this, this);
@@ -93,6 +100,7 @@ public class Main extends JavaPlugin implements Listener {
 			}
 			getLogger().info("Done!");
 		}
+		session.close();
 		getLogger().info("Disabled TGConsole!");
 	}
   
@@ -198,8 +206,8 @@ public class Main extends JavaPlugin implements Listener {
 		locale.put("notifyDeath", getConfig().getString("locale.onDeath"));
 		locale.put("notifyChat", getConfig().getString("locale.onChat"));
 		locale.put("notifyCMD", getConfig().getString("locale.onCommand"));
-		locale.put("showMenu", "locale.showMenu");
-		locale.put("hideMenu", "locale.hideMenu");
+		locale.put("showMenu", getConfig().getString("locale.showMenu"));
+		locale.put("hideMenu", getConfig().getString("locale.hideMenu"));
 		
 		menu = getConfig().getBoolean("menu.enabled");
 		keyboard = new ArrayList<>();
@@ -211,6 +219,59 @@ public class Main extends JavaPlugin implements Listener {
 			keyboard.add(row);
 		}
 	}
+	
+	public void reloadCfg(){
+		locale.clear();
+		keyboard.clear();
+		admins.clear();
+		ids.clear();
+		session.close();
+		reloadConfig();
+		loadConfigs();
+		bot = new TGself();
+		try {
+			session = botsApi.registerBot(bot);
+		} catch (TelegramApiRequestException e) {
+			e.printStackTrace();
+			
+		}
+		getLogger().info("ALL IS OK!");
+		getLogger().info("TGConsole  reloaded!");
+	}
+	
+	@Override
+	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+		if(args.length<1){
+			if(sender instanceof Player){
+				if(((Player)sender).hasPermission("tgconsole.info")){
+					sender.sendMessage("TGConsole - control your server remotely using telegram! Author: Azim");
+					return true;
+				}else{
+					return false;
+				}
+			}else{
+				getLogger().info("TGConsole - control your server remotely using telegram! Author: Azim");
+				return true;
+			}
+		}
+		if(args[0].equalsIgnoreCase("reload")){
+			if(sender instanceof Player){
+				if(((Player)sender).hasPermission("tgconsole.reload")){
+					reloadCfg();
+					sender.sendMessage("TGConsole reloaded!");
+					return true;
+				}else{
+					return false;
+				}
+			}else{
+				reloadCfg();
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
   
   	public static void debug(String msng){
   		if (debug) {

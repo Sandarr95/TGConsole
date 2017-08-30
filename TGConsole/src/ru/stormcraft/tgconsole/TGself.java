@@ -1,6 +1,7 @@
 package ru.stormcraft.tgconsole;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -116,13 +117,23 @@ public class TGself extends TelegramLongPollingBot {
 	
 	@SuppressWarnings("deprecation")
 	public void execmd(String cmd, long delay, ConsoleCommandSender sender, long chat_id){
-		try{
+		
+		
+		
+		
 			File templog = new File("templog.txt");
-			TiedOutputStream tos = new TiedOutputStream(templog);
+			TiedOutputStream tos = null;
+			try {
+				tos = new TiedOutputStream(templog);
+			} catch (FileNotFoundException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+				return;
+			}
 			PrintStream def = System.out;
 
 			System.setOut(tos);
-
+		try{
 			Bukkit.getServer().dispatchCommand(sender, cmd);
 			Thread.sleep(delay);
 			System.setOut(def);
@@ -143,6 +154,7 @@ public class TGself extends TelegramLongPollingBot {
 			if (result.length() < 4002) {
 				newStrings.add(result);
 			}
+		
 			for (String part : newStrings){
 				part = part + "`";
     
@@ -158,6 +170,10 @@ public class TGself extends TelegramLongPollingBot {
 		
 		}catch(InterruptedException|SecurityException|IOException | TelegramApiException e){
 			e.printStackTrace();
+			tos.close();
+			//sc.close();
+			
+			
 		}
 	}
 	public SendMessage getid(Update update){
