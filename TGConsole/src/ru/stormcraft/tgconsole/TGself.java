@@ -4,12 +4,16 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.ConsoleCommandSender;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.objects.Update;
+import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboardRemove;
+import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
 
@@ -40,7 +44,29 @@ public class TGself extends TelegramLongPollingBot {
 				}
 				return;
 			}
-			if (Main.admins.contains( update.getMessage().getChatId().toString())||Main.admins.contains(update.getMessage().getChat().getUserName())||Main.admins.contains("@"+update.getMessage().getChat().getUserName())){
+			if ((update.getMessage().getText().startsWith("/showmenu")||update.getMessage().getText().startsWith("/show")) && Main.menu && isAdmin(update)){
+				ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
+				keyboardMarkup.setKeyboard(Main.keyboard);
+				SendMessage message = new SendMessage().setChatId(update.getMessage().getChatId()).setText(Main.locale.get("showMenu")).setReplyMarkup(keyboardMarkup);
+				try {
+					sendMessage(message);
+					Thread.sleep(500);
+				} catch (TelegramApiException | InterruptedException e) {
+					e.printStackTrace();
+				}
+				return;
+			}
+			if ((update.getMessage().getText().startsWith("/hidemenu")||update.getMessage().getText().startsWith("/hide")) && Main.menu && isAdmin(update)){
+				SendMessage message = new SendMessage().setChatId(update.getMessage().getChatId()).setText(Main.locale.get("hideMenu")).setReplyMarkup(new ReplyKeyboardRemove());
+				try {
+					sendMessage(message);
+					Thread.sleep(500);
+				} catch (TelegramApiException | InterruptedException e) {
+					e.printStackTrace();
+				}
+				return;
+			}
+			if (isAdmin(update)){
 				Main.debug("one of the admins - " + update.getMessage().getChatId() + " ;");
 				Bukkit.getLogger().info(Main.locale.get("Admin") + " " + update.getMessage().getChat().getFirstName() + " " + update.getMessage().getChat().getLastName() + " @" + update.getMessage().getChat().getUserName());
 				Bukkit.getLogger().info(Main.locale.get("Action") + " " + update.getMessage().getText());
@@ -143,5 +169,8 @@ public class TGself extends TelegramLongPollingBot {
 			message = new SendMessage().setChatId(update.getMessage().getChatId()).setText(Main.locale.get("unknownCommand"));
 		}
 		return message;
+	}
+	public boolean isAdmin(Update update){
+		return (Main.admins.contains( update.getMessage().getChatId().toString())||Main.admins.contains(update.getMessage().getChat().getUserName())||Main.admins.contains("@"+update.getMessage().getChat().getUserName()));
 	}
 }

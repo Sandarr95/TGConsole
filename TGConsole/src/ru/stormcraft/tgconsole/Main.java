@@ -19,6 +19,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.telegram.telegrambots.ApiContextInitializer;
 import org.telegram.telegrambots.TelegramBotsApi;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
+import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
 
 public class Main extends JavaPlugin implements Listener {
@@ -26,8 +27,10 @@ public class Main extends JavaPlugin implements Listener {
 	static List<Long> ids;
 	static boolean sendids = true;
 	static boolean debug;
+	static boolean menu;
 	static File tfolder;
 	TGself bot;
+	static List<KeyboardRow> keyboard;
 	public static String botName = "test";
 	public static String botToken = "resd";
 	public static long delay;
@@ -78,7 +81,7 @@ public class Main extends JavaPlugin implements Listener {
 	@Override
 	public void onDisable() {
 		if(getConfig().getBoolean("notify.sendServerShutdown")){
-			//sendAll(bot,locale.get("notifyShutdown"),this);
+			getLogger().info("Sending shutdown messages to admins...");
 			for(long user_id:ids){
 				SendMessage message = new SendMessage().setChatId(user_id).setText(locale.get("notifyShutdown")).enableMarkdown(true);
 				try {
@@ -88,6 +91,7 @@ public class Main extends JavaPlugin implements Listener {
 					e.printStackTrace();
 				}
 			}
+			getLogger().info("Done!");
 		}
 		getLogger().info("Disabled TGConsole!");
 	}
@@ -97,13 +101,12 @@ public class Main extends JavaPlugin implements Listener {
 			String pat = tfolder.getAbsolutePath().replace("\\" + tfolder.getPath(), "");
 			File folder = new File(pat);
 			File[] files = folder.listFiles();
-			debug("Files in the main folder: " + files.length);
-			File[] arrayOfFile1;
-			int j = (arrayOfFile1 = files).length;
-			for (int i = 0; i < j; i++){
-				File file = arrayOfFile1[i];
-				if ((file.getName().contains("templog")) && (!file.delete())) {
-					debug("Can't remove " + file.getAbsolutePath());
+			
+			for (File file : files){
+				if (file.getName().contains("templog")){
+					if(!file.delete()) {
+						debug("Can't remove " + file.getAbsolutePath());
+					}
 				}
 			}
 		}catch(NullPointerException e){
@@ -134,12 +137,29 @@ public class Main extends JavaPlugin implements Listener {
 		getConfig().addDefault("locale.nothingHappened", "Nothing happened.");
 		getConfig().addDefault("locale.serverStart", "Server is now working!");
 		getConfig().addDefault("locale.serverShutdown", "Server is shutting down=(");
-		
+		getConfig().addDefault("locale.showMenu", "Here is your menu!");
+		getConfig().addDefault("locale.hideMenu", "Menu is now hidden!");
+				
 		getConfig().addDefault("locale.onJoin", "JOINED_MSG");
 		getConfig().addDefault("locale.onLeave", "LEAVE_MSG");
 		getConfig().addDefault("locale.onDeath", "DEATH_MSG");
 		getConfig().addDefault("locale.onChat", "PLAYER : MESSAGE");
 		getConfig().addDefault("locale.onCommand", "PLAYER : COMMAND");
+		
+		getConfig().addDefault("menu.enabled", false);
+
+		ArrayList<String> defaultMenuCommands1 = new ArrayList<String>();
+		defaultMenuCommands1.add("command:1");
+		getConfig().addDefault("menu.row1", defaultMenuCommands1);
+		ArrayList<String> defaultMenuCommands2 = new ArrayList<String>();
+		defaultMenuCommands2.add("command:2");
+		defaultMenuCommands2.add("command:3");
+		getConfig().addDefault("menu.row2", defaultMenuCommands2);
+		ArrayList<String> defaultMenuCommands3 = new ArrayList<String>();
+		defaultMenuCommands3.add("command:4");
+		defaultMenuCommands3.add("command:5");  //don't look at these defaults
+		defaultMenuCommands3.add("command:6");
+		getConfig().addDefault("menu.row3", defaultMenuCommands3);
 		
 		getConfig().addDefault("notify.enabled", false);
 		ArrayList<Long> idss = new ArrayList<Long>();
@@ -151,9 +171,6 @@ public class Main extends JavaPlugin implements Listener {
 		getConfig().addDefault("notify.sendServerStart", false);
 		getConfig().addDefault("notify.sendServerShutdown", false);
 		getConfig().addDefault("notify.sendCommands", false);
-		
-		
-		
 		
 		getConfig().options().copyDefaults(true);
 		saveConfig();
@@ -181,6 +198,18 @@ public class Main extends JavaPlugin implements Listener {
 		locale.put("notifyDeath", getConfig().getString("locale.onDeath"));
 		locale.put("notifyChat", getConfig().getString("locale.onChat"));
 		locale.put("notifyCMD", getConfig().getString("locale.onCommand"));
+		locale.put("showMenu", "locale.showMenu");
+		locale.put("hideMenu", "locale.hideMenu");
+		
+		menu = getConfig().getBoolean("menu.enabled");
+		keyboard = new ArrayList<>();
+		for(int i = 1;i<=3;i++){
+			KeyboardRow row = new KeyboardRow();
+			for(String menucmd:getConfig().getStringList("menu.row"+i)){
+				row.add(menucmd);
+			}
+			keyboard.add(row);
+		}
 	}
   
   	public static void debug(String msng){
@@ -204,7 +233,6 @@ public class Main extends JavaPlugin implements Listener {
 				}
 			}
   		});
-  		
   	}
   	
   	@EventHandler(priority = EventPriority.LOW)
@@ -230,16 +258,20 @@ public class Main extends JavaPlugin implements Listener {
   	}
   	@EventHandler(priority = EventPriority.LOW)
   	public void onChat(AsyncPlayerChatEvent e){
-  		if(getConfig().getBoolean("notify.sendChat") && getConfig().getBoolean("notify.enabled")){
-  			String msg = locale.get("notifyChat").replace("MESSAGE", e.getMessage()).replace("PLAYER", e.getPlayer().getName()).replace("`", "");
-  			sendAll(bot,"`"+msg+"`",this);
+  		if(!e.isCancelled()){
+  			if(getConfig().getBoolean("notify.sendChat") && getConfig().getBoolean("notify.enabled")){
+  				String msg = locale.get("notifyChat").replace("MESSAGE", e.getMessage()).replace("PLAYER", e.getPlayer().getName()).replace("`", "");
+  				sendAll(bot,"`"+msg+"`",this);
+  			}
   		}
   	}
   	@EventHandler(priority = EventPriority.LOW)
   	public void onCmd(PlayerCommandPreprocessEvent e){
-  		if(getConfig().getBoolean("notify.sendCommands") && getConfig().getBoolean("notify.enabled")){
-  			String msg = locale.get("notifyCMD").replace("COMMAND", e.getMessage()).replace("PLAYER", e.getPlayer().getName()).replace("`", "");
-  			sendAll(bot,"`"+msg+"`", this);
+  		if(!e.isCancelled()){
+  			if(getConfig().getBoolean("notify.sendCommands") && getConfig().getBoolean("notify.enabled")){
+  				String msg = locale.get("notifyCMD").replace("COMMAND", e.getMessage()).replace("PLAYER", e.getPlayer().getName()).replace("`", "");
+  				sendAll(bot,"`"+msg+"`", this);
+  			}
   		}
   	}
 }
