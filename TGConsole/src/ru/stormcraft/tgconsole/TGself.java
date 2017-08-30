@@ -93,7 +93,12 @@ public class TGself extends TelegramLongPollingBot {
 						return;
 					}
 					for(String cmd:commands){
-						long del = Long.valueOf(cmd.substring(0,cmd.indexOf(":")));
+						long del;
+						try{
+						del = Long.valueOf(cmd.substring(0,cmd.indexOf(":")));
+						}catch(IllegalArgumentException e){
+							del = 4;
+						}
 						if(del>30||del<4){
 							del = 4;
 						}
