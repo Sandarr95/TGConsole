@@ -232,7 +232,9 @@ public class Main extends JavaPlugin implements Listener {
 		for(int i = 1;i<=3;i++){
 			KeyboardRow row = new KeyboardRow();
 			for(String menucmd:getConfig().getStringList("menu.row"+i)){
-				row.add(menucmd);
+				if(!menucmd.equals("//")){
+					row.add(menucmd);
+				}
 			}
 			keyboard.add(row);
 		}
