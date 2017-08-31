@@ -180,11 +180,16 @@ public class Main extends JavaPlugin implements Listener {
 		getConfig().addDefault("menu.enabled", false);
 
 		ArrayList<String> defaultMenuCommands1 = new ArrayList<String>();
-		defaultMenuCommands1.add("command:1");
+		defaultMenuCommands1.add("command 1");
 		getConfig().addDefault("menu.row1", defaultMenuCommands1);
 		ArrayList<String> defaultMenuCommands2 = new ArrayList<String>();
+		defaultMenuCommands2.add("command 2");
+		defaultMenuCommands2.add("command 3");
 		getConfig().addDefault("menu.row2", defaultMenuCommands2);
 		ArrayList<String> defaultMenuCommands3 = new ArrayList<String>();
+		defaultMenuCommands3.add("command 4");
+		defaultMenuCommands3.add("///command 5");
+		defaultMenuCommands3.add("command 6");
 		getConfig().addDefault("menu.row3", defaultMenuCommands3);
 		
 		getConfig().addDefault("notify.enabled", false);
@@ -232,7 +237,7 @@ public class Main extends JavaPlugin implements Listener {
 		for(int i = 1;i<=3;i++){
 			KeyboardRow row = new KeyboardRow();
 			for(String menucmd:getConfig().getStringList("menu.row"+i)){
-				if(!menucmd.equals("//")){
+				if(!menucmd.startsWith("///")){
 					row.add(menucmd);
 				}
 			}
