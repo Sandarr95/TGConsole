@@ -68,7 +68,7 @@ public class Main extends JavaPlugin implements Listener {
 					if(getConfig().getBoolean("notify.sendServerStart")&&getConfig().getBoolean("notify.enabled")){
 						sendAll(bot,locale.get("notifyStart"),this);
 					}
-					
+					if(getConfig().getBoolean("share_stats")){
 					Metrics metrics = new Metrics(this);
 					metrics.addCustomChart(new Metrics.SimplePie("notify_usage", new Callable<String>() {
 			            @Override
@@ -90,7 +90,11 @@ public class Main extends JavaPlugin implements Listener {
 			            	}
 			            }
 			        }));
-					
+					}else{
+						Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "#  WARNING:  #");
+						Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "You are not sharing stats with developer!");
+						Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "That makes him sad :.( ");
+					}
 				}catch (TelegramApiException e){
 					Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "|----------------------------------------------|");
 					Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "| Fatal Error Occured while enabling TGConsole,|");
@@ -159,7 +163,7 @@ public class Main extends JavaPlugin implements Listener {
 		ArrayList<String> adminss = new ArrayList<String>();
 		adminss.add("@SPC_Azim");
 		getConfig().addDefault("admins", adminss);
-		
+		getConfig().addDefault("share_stats", true);
 		getConfig().addDefault("locale.Admin", "Admin:");
 		getConfig().addDefault("locale.Action", "Action:");
 		getConfig().addDefault("locale.commandOutput", "Command Output:");
@@ -203,7 +207,16 @@ public class Main extends JavaPlugin implements Listener {
 		getConfig().addDefault("notify.sendServerShutdown", false);
 		getConfig().addDefault("notify.sendCommands", false);
 		
-		getConfig().options().copyDefaults(true);
+		getConfig().options().header(
+				"# # # # # # # # # # # # # # # # # # # # #\n"+
+				"TGConsole: control your server remotely #\n"+
+				"using Telegram!                         #\n"+
+				"Autor: Azim(t.me/spc_azim), contact me  #\n"+
+				"if you are having troubles with this    #\n"+
+				"plugin, i will do my best to help =)    #\n"+
+				"# # # # # # # # # # # # # # # # # # # # #"
+				).
+		copyDefaults(true);
 		saveConfig();
 		
 		botName = getConfig().getString("botName");
@@ -260,7 +273,7 @@ public class Main extends JavaPlugin implements Listener {
 			e.printStackTrace();
 			
 		}
-		getLogger().info("ALL IS OK!");
+		getLogger().info("ALL IS OK! ignore error code above, it's just bot disliking it's shutdown...");
 		getLogger().info("TGConsole  reloaded!");
 	}
 	
