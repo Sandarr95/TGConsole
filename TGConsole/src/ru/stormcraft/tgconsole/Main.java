@@ -2,6 +2,7 @@ package ru.stormcraft.tgconsole;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -43,6 +44,7 @@ public class Main extends JavaPlugin implements Listener {
 	public static String botToken = "resd";
 	public static long delay;
 	public static HashMap<String, String> locale;
+	public static ArrayList<group> groups;
 	@Override
 	public void onEnable() {
 		tfolder = this.getDataFolder();
@@ -164,7 +166,11 @@ public class Main extends JavaPlugin implements Listener {
 		adminss.add("@SPC_Azim");
 		getConfig().addDefault("admins", adminss);
 		getConfig().addDefault("share_stats", true);
-		getConfig().addDefault("locale.Admin", "Admin:");
+		getConfig().addDefault("groups.speaker.ids", Arrays.asList((long)0,(long)1));
+		getConfig().addDefault("groups.speaker.commands", Arrays.asList("say","broadcast","kick"));
+		getConfig().addDefault("groups.speaker.blocked", Arrays.asList("kickall"));
+		
+		getConfig().addDefault("locale.User", "User:");
 		getConfig().addDefault("locale.Action", "Action:");
 		getConfig().addDefault("locale.commandOutput", "Command Output:");
 		getConfig().addDefault("locale.unknownCommand", "Unknown command!");
@@ -223,13 +229,25 @@ public class Main extends JavaPlugin implements Listener {
 		botToken = getConfig().getString("token");
 		admins = getConfig().getStringList("admins");
 		ids = getConfig().getLongList("notify.ids");
-		
+		groups = getGroups("groups");
+		for(group gr:groups){
+			debug(" "+gr.name); //replace with debugs and add functional
+			for(Long id:gr.ids){ 
+				debug("user : "+id);
+			}
+			for(String ccc:gr.commands){
+				debug("command : "+ccc);
+			}
+			for(String ccc:gr.forbidden){
+				debug("blocked command : "+ccc);
+			}
+		}
 		sendids = getConfig().getBoolean("sendids");
 		debug = getConfig().getBoolean("debug");
 		delay = getConfig().getLong("delay");
 		
 		locale = new HashMap<String, String>();
-		locale.put("Admin", getConfig().getString("locale.Admin"));
+		locale.put("User", getConfig().getString("locale.User"));
 		locale.put("Action", getConfig().getString("locale.Action"));
 		locale.put("commandOutput", getConfig().getString("locale.commandOutput"));
 		locale.put("unknownCommand", getConfig().getString("locale.unknownCommand"));
@@ -277,6 +295,15 @@ public class Main extends JavaPlugin implements Listener {
 		getLogger().info("TGConsole  reloaded!");
 	}
 	
+	
+	public ArrayList<group> getGroups(String section){
+		ArrayList<group> result = new ArrayList<group>();
+		for (String key : getConfig().getConfigurationSection(section).getKeys(false)){
+			group gr = new group(key,getConfig().getStringList(section+"."+key+".commands"),getConfig().getStringList(section+"."+key+".blocked"),getConfig().getLongList(section+"."+key+".ids"));
+			result.add(gr);
+		}
+		return result;
+	}
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		if(args.length<1){

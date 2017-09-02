@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
 
 import org.bukkit.Bukkit;
@@ -14,7 +13,6 @@ import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.objects.Update;
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboardRemove;
-import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
 
@@ -67,55 +65,67 @@ public class TGself extends TelegramLongPollingBot {
 				}
 				return;
 			}
-			if (isAdmin(update)){
-				Main.debug("one of the admins - " + update.getMessage().getChatId() + " ;");
-				Bukkit.getLogger().info(Main.locale.get("Admin") + " " + update.getMessage().getChat().getFirstName() + " " + update.getMessage().getChat().getLastName() + " @" + update.getMessage().getChat().getUserName());
+			if((update.getMessage().getText().startsWith("/multiple"))&&isAdmin(update)){
+				Bukkit.getLogger().info(Main.locale.get("User") + " " + update.getMessage().getChat().getFirstName() + " " + update.getMessage().getChat().getLastName() + " @" + update.getMessage().getChat().getUserName());
 				Bukkit.getLogger().info(Main.locale.get("Action") + " " + update.getMessage().getText());
 				ConsoleCommandSender sender = Bukkit.getConsoleSender();
-				if(update.getMessage().getText().startsWith("/multiple")){
-					Scanner ms = new Scanner(update.getMessage().getText());
-					ArrayList<String> commands = new ArrayList<String>();
-					while(ms.hasNextLine()){
-						commands.add(ms.nextLine());
+				Scanner ms = new Scanner(update.getMessage().getText());
+				ArrayList<String> commands = new ArrayList<String>();
+				while(ms.hasNextLine()){
+					commands.add(ms.nextLine());
+				}
+				ms.close();
+				commands.remove(0);
+				if(commands.isEmpty()){
+					SendMessage message = new SendMessage()
+					.setChatId(update.getMessage().getChatId())
+					.setText(Main.locale.get("nothingHappened")).enableMarkdown(true);
+					try{
+						sendMessage(message);
+						Thread.sleep(500);
+					}catch(InterruptedException|TelegramApiException e){
+						e.printStackTrace();
 					}
-					ms.close();
-					commands.remove(0);
-					if(commands.isEmpty()){
-						SendMessage message = new SendMessage()
-						.setChatId(update.getMessage().getChatId())
-						.setText(Main.locale.get("nothingHappened")).enableMarkdown(true);
-						try{
-							sendMessage(message);
-							Thread.sleep(500);
-						}catch(InterruptedException|TelegramApiException e){
-							e.printStackTrace();
-						}
-						return;
-					}
-					for(String cmd:commands){
-						long del;
-						try{
-						del = Long.valueOf(cmd.substring(0,cmd.indexOf(":")));
-						}catch(IllegalArgumentException e){
-							del = 4;
-						}
-						if(del>30||del<4){
-							del = 4;
-						}
-						del = del*1000;
-						String toexe = cmd.substring(cmd.indexOf(":")+1);
-						execmd(toexe,del,sender,update.getMessage().getChatId());
-						
-					}
-					
 					return;
 				}
+				for(String cmd:commands){
+					long del;
+					try{
+					del = Long.valueOf(cmd.substring(0,cmd.indexOf(":")));
+					}catch(IllegalArgumentException e){
+						del = 4;
+					}
+					if(del>30||del<4){
+						del = 4;
+					}
+					del = del*1000;
+					String toexe = cmd.substring(cmd.indexOf(":")+1);
+					execmd(toexe,del,sender,update.getMessage().getChatId());
+					
+				}
+				
+				return;
+			
+			}
+			
+			
+			if (havePerms(update)){
+				Bukkit.getLogger().info(Main.locale.get("User") + " " + update.getMessage().getChat().getFirstName() + " " + update.getMessage().getChat().getLastName() + " @" + update.getMessage().getChat().getUserName());
+				Bukkit.getLogger().info(Main.locale.get("Action") + " " + update.getMessage().getText());
+				ConsoleCommandSender sender = Bukkit.getConsoleSender();
+				
 				
 				execmd(update.getMessage().getText(), Main.delay, sender, update.getMessage().getChatId());
-				
+				return;
 			}else{
 				Main.debug("not an admin;");
 				
+			}
+			
+			try{
+				sendMessage(getid(update));
+			} catch (TelegramApiException e){
+				e.printStackTrace();
 			}
 		}
 	}
@@ -131,7 +141,6 @@ public class TGself extends TelegramLongPollingBot {
 			try {
 				tos = new TiedOutputStream(templog);
 			} catch (FileNotFoundException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 				return;
 			}
@@ -150,6 +159,8 @@ public class TGself extends TelegramLongPollingBot {
 				result = result + System.lineSeparator();
 				result = result + sc.nextLine();
 			}
+			tos.close();
+			sc.close();
 			result = result.replaceAll("[\\[;0-9]+m", " ");
 			ArrayList<String> newStrings = new ArrayList<String>();
 			while (result.length() > 4001){
@@ -169,16 +180,14 @@ public class TGself extends TelegramLongPollingBot {
 				sendMessage(message);
 				Thread.sleep(500);
 			}
-			tos.close();
-			sc.close();
+			
 			Main.clearLog();
 		
 		}catch(InterruptedException|SecurityException|IOException | TelegramApiException e){
 			e.printStackTrace();
-			tos.close();
-			//sc.close();
-			
-			
+			try{
+				tos.close();
+			}catch(Exception ignored){ }
 		}
 	}
 	public SendMessage getid(Update update){
@@ -194,4 +203,18 @@ public class TGself extends TelegramLongPollingBot {
 	public boolean isAdmin(Update update){
 		return (Main.admins.contains( update.getMessage().getChatId().toString())||Main.admins.contains(update.getMessage().getChat().getUserName())||Main.admins.contains("@"+update.getMessage().getChat().getUserName()));
 	}
+	public boolean havePerms(Update update){
+		if(isAdmin(update)){
+			Main.debug("is admin");
+			return true;
+		}
+		for(group gr:Main.groups){
+			if(gr.havePermission(update.getMessage().getText(), update.getMessage().getChatId())){
+				Main.debug("is"+ gr.name);
+				return true;
+			}
+		}
+		return false;
+	}
+	
 }

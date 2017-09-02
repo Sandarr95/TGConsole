@@ -1,6 +1,6 @@
 name: TGconsole
 main: ru.stormcraft.tgconsole.Main
-version: 0.9
+version: 0.9.dev
 load: STARTUP
 author: Azim
 depend: [TelegramBotsAPI]
