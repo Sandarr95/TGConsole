@@ -11,7 +11,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -64,7 +63,7 @@ public class Main extends JavaPlugin implements Listener {
 					if(getConfig().getBoolean("notify.enabled")){
 						Bukkit.getPluginManager().registerEvents(this, this);
 					}
-					
+					Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "Starting remote control bot - "+ChatColor.YELLOW+Configos.botName);
 					Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "|----------------------------------------|");
 					Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "|  Successfully started the remote bot!  |");
 					Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "|----------------------------------------|");
@@ -72,32 +71,34 @@ public class Main extends JavaPlugin implements Listener {
 						sendAll(bot,locale.get("notifyStart"),this);
 					}
 					if(getConfig().getBoolean("share_stats")){
-					Metrics metrics = new Metrics(this);
-					metrics.addCustomChart(new Metrics.SimplePie("notify_usage", new Callable<String>() {
-			            @Override
-			            public String call() throws Exception {
-			            	if(getConfig().getBoolean("notify.enabled")){
-			            		return "enabled";
-			            	}else{
-			            		return "disabled";
+						Metrics metrics = new Metrics(this);
+						metrics.addCustomChart(new Metrics.SimplePie("notify_usage", new Callable<String>() {
+			            	@Override
+			            	public String call() throws Exception {
+			            		if(getConfig().getBoolean("notify.enabled")){
+			            			return "enabled";
+			            		}else{
+			            			return "disabled";
+			            		}
 			            	}
-			            }
-			        }));
-					metrics.addCustomChart(new Metrics.SimplePie("menu_usage", new Callable<String>() {
-			            @Override
-			            public String call() throws Exception {
-			            	if(getConfig().getBoolean("menu.enabled")){
-			            		return "enabled";
-			            	}else{
-			            		return "disabled";
+			        	}));
+						metrics.addCustomChart(new Metrics.SimplePie("menu_usage", new Callable<String>() {
+			            	@Override
+			            	public String call() throws Exception {
+			            		if(getConfig().getBoolean("menu.enabled")){
+			            			return "enabled";
+			            		}else{
+			            			return "disabled";
+			            		}
 			            	}
-			            }
-			        }));
+			        	}));
 					}else{
 						Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "#  WARNING:  #");
 						Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "You are not sharing stats with developer!");
 						Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "That makes him sad :.( ");
 					}
+					Bukkit.getConsoleSender().sendMessage(ChatColor.YELLOW+"TGConsole is up and running,"+ChatColor.GREEN+" all is OK! :)");
+					
 				}catch (TelegramApiException e){
 					Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "|----------------------------------------------|");
 					Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "| Fatal Error Occured while enabling TGConsole,|");
@@ -167,7 +168,7 @@ public class Main extends JavaPlugin implements Listener {
 		adminss.add("@SPC_Azim");
 		getConfig().addDefault("admins", adminss);
 		getConfig().addDefault("share_stats", true);
-		getConfig().addDefault("groups.speaker.ids", Arrays.asList((long)0,(long)1));
+		getConfig().addDefault("groups.speaker.users", Arrays.asList("@username","username","0"));
 		getConfig().addDefault("groups.speaker.commands", Arrays.asList("say","broadcast","kick"));
 		getConfig().addDefault("groups.speaker.blocked", Arrays.asList("kickall"));
 		
@@ -215,13 +216,12 @@ public class Main extends JavaPlugin implements Listener {
 		getConfig().addDefault("notify.sendCommands", false);
 		
 		getConfig().options().header(
-				"# # # # # # # # # # # # # # # # # # # # #\n"+
-				"TGConsole: control your server remotely #\n"+
-				"using Telegram!                         #\n"+
-				"Autor: Azim(t.me/spc_azim), contact me  #\n"+
-				"if you are having troubles with this    #\n"+
-				"plugin, i will do my best to help =)    #\n"+
-				"# # # # # # # # # # # # # # # # # # # # #"
+				"# # # # # # # # # # # # # # # # # # # # # # # # # # # # #\n"+
+				"TGConsole: control your server remotely using Telegram! #\n"+
+				"Autor: Azim(t.me/spc_azim),  contact  me  if  you  are  #\n"+
+				"  having troubles with this plugin,                     #\n"+
+				"                    i will do my best to help you =)    #\n"+
+				"# # # # # # # # # # # # # # # # # # # # # # # # # # # # #"
 				).
 		copyDefaults(true);
 		saveConfig();
@@ -233,7 +233,7 @@ public class Main extends JavaPlugin implements Listener {
 		groups = getGroups("groups");
 		for(group gr:groups){
 			debug(" "+gr.name); //replace with debugs and add functional
-			for(Long id:gr.ids){ 
+			for(String id:gr.users){ 
 				debug("user : "+id);
 			}
 			for(String ccc:gr.commands){
@@ -300,7 +300,7 @@ public class Main extends JavaPlugin implements Listener {
 	public ArrayList<group> getGroups(String section){
 		ArrayList<group> result = new ArrayList<group>();
 		for (String key : getConfig().getConfigurationSection(section).getKeys(false)){
-			group gr = new group(key,getConfig().getStringList(section+"."+key+".commands"),getConfig().getStringList(section+"."+key+".blocked"),getConfig().getLongList(section+"."+key+".ids"));
+			group gr = new group(key,getConfig().getStringList(section+"."+key+".commands"),getConfig().getStringList(section+"."+key+".blocked"),getConfig().getStringList(section+"."+key+".users"));
 			result.add(gr);
 		}
 		return result;

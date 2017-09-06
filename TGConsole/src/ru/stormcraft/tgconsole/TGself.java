@@ -110,12 +110,12 @@ public class TGself extends TelegramLongPollingBot {
 			
 			
 			if (havePerms(update)){
-				Bukkit.getLogger().info(Main.locale.get("User") + " " + update.getMessage().getChat().getFirstName() + " " + update.getMessage().getChat().getLastName() + " @" + update.getMessage().getChat().getUserName());
+				Bukkit.getLogger().info(Main.locale.get("User") + " " + update.getMessage().getFrom().getFirstName() + " " + update.getMessage().getFrom().getLastName() + " @" + update.getMessage().getFrom().getUserName());
 				Bukkit.getLogger().info(Main.locale.get("Action") + " " + update.getMessage().getText());
 				ConsoleCommandSender sender = Bukkit.getConsoleSender();
 				
 				
-				execmd(update.getMessage().getText(), Main.delay, sender, update.getMessage().getChatId());
+				execmd(update.getMessage().getText(), Main.delay, sender, update.getMessage().getFrom().getId());
 				return;
 			}else{
 				Main.debug("not an admin;");
@@ -201,7 +201,7 @@ public class TGself extends TelegramLongPollingBot {
 		return message;
 	}
 	public boolean isAdmin(Update update){
-		return (Main.admins.contains( update.getMessage().getChatId().toString())||Main.admins.contains(update.getMessage().getChat().getUserName())||Main.admins.contains("@"+update.getMessage().getChat().getUserName()));
+		return (Main.admins.contains( update.getMessage().getFrom().getId().toString())||Main.admins.contains(update.getMessage().getFrom().getUserName())||Main.admins.contains("@"+update.getMessage().getFrom().getUserName()));
 	}
 	public boolean havePerms(Update update){
 		if(isAdmin(update)){
@@ -209,7 +209,7 @@ public class TGself extends TelegramLongPollingBot {
 			return true;
 		}
 		for(group gr:Main.groups){
-			if(gr.havePermission(update.getMessage().getText(), update.getMessage().getChatId())){
+			if(gr.havePermission(update.getMessage().getText(), update.getMessage().getFrom())){
 				Main.debug("is"+ gr.name);
 				return true;
 			}
