@@ -277,6 +277,7 @@ public class Main extends JavaPlugin implements Listener {
 		}
 	}
 	
+	@SuppressWarnings("deprecation")
 	public void reloadCfg(){
 		locale.clear();
 		keyboard.clear();
