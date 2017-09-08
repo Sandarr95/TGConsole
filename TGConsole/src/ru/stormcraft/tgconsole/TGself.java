@@ -30,7 +30,7 @@ public class TGself extends TelegramLongPollingBot {
 	@Override
 	public void onUpdateReceived(Update update){
 		Main.debug("got update;");
-		if ((update.hasMessage()) && (update.getMessage().hasText())){
+		if (update.hasMessage() && update.getMessage().hasText() && !(update.getMessage().getChat().isChannelChat())){
 			Main.debug("it have text;");
 			if (update.getMessage().getText().startsWith("/start")) {
 				return;
@@ -201,7 +201,7 @@ public class TGself extends TelegramLongPollingBot {
 		return message;
 	}
 	public boolean isAdmin(Update update){
-		return (Main.admins.contains( update.getMessage().getFrom().getId().toString())||Main.admins.contains(update.getMessage().getFrom().getUserName())||Main.admins.contains("@"+update.getMessage().getFrom().getUserName()));
+		return (Main.admins.contains( update.getMessage().getFrom().getId().toString()) || Main.admins.contains(update.getMessage().getFrom().getUserName()) || Main.admins.contains("@"+update.getMessage().getFrom().getUserName()));
 	}
 	public boolean havePerms(Update update){
 		if(isAdmin(update)){
