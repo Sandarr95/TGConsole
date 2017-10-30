@@ -28,7 +28,6 @@ public class TGroup {
 	}
 
 	public TGroup(String name, List<String> commands,List<String> forbidden, List<String> users) {
-		super();
 		this.name = name;
 		this.commands = commands;
 		this.forbidden = forbidden;

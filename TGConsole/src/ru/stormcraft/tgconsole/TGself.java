@@ -38,10 +38,10 @@ public class TGself extends TelegramLongPollingBot {
 		Main.debug("got update;");
 		if (update.hasMessage() && update.getMessage().hasText() && !(update.getMessage().getChat().isChannelChat())){
 			Main.debug("it have text;");
-			if (update.getMessage().getText().startsWith("/start")) {
+			if (update.getMessage().getText().toLowerCase().startsWith("/start")) {
 				return;
 			}
-			if (update.getMessage().getText().startsWith("/getid")) {
+			if (update.getMessage().getText().toLowerCase().startsWith("/getid")) {
 				try{
 					execute(getid(update));
 				} catch (TelegramApiException e){
@@ -49,7 +49,10 @@ public class TGself extends TelegramLongPollingBot {
 				}
 				return;
 			}
-			if ((update.getMessage().getText().startsWith("/showmenu")||update.getMessage().getText().startsWith("/show")) && Main.menu && isAdmin(update)){
+			if ((update.getMessage().getText().toLowerCase().startsWith("/showmenu")
+					||update.getMessage().getText().toLowerCase().startsWith("/show"))
+					&& Main.menu
+					&& isAdmin(update)){
 				ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
 				keyboardMarkup.setKeyboard(Main.keyboard);
 				SendMessage message = new SendMessage().setChatId(update.getMessage().getChatId()).setText(Main.locale.get("showMenu")).setReplyMarkup(keyboardMarkup);
@@ -61,7 +64,10 @@ public class TGself extends TelegramLongPollingBot {
 				}
 				return;
 			}
-			if ((update.getMessage().getText().startsWith("/hidemenu")||update.getMessage().getText().startsWith("/hide")) && Main.menu && isAdmin(update)){
+			if ((update.getMessage().getText().toLowerCase().startsWith("/hidemenu")
+					||update.getMessage().getText().toLowerCase().startsWith("/hide"))
+					&& Main.menu
+					&& isAdmin(update)){
 				SendMessage message = new SendMessage().setChatId(update.getMessage().getChatId()).setText(Main.locale.get("hideMenu")).setReplyMarkup(new ReplyKeyboardRemove());
 				try {
 					execute(message);
@@ -71,7 +77,7 @@ public class TGself extends TelegramLongPollingBot {
 				}
 				return;
 			}
-			if((update.getMessage().getText().startsWith("/multiple"))&&isAdmin(update)){
+			if((update.getMessage().getText().toLowerCase().startsWith("/multiple"))&&isAdmin(update)){
 				Bukkit.getLogger().info(Main.locale.get("User") + " " + update.getMessage().getChat().getFirstName() + " " + update.getMessage().getChat().getLastName() + " @" + update.getMessage().getChat().getUserName());
 				Bukkit.getLogger().info(Main.locale.get("Action") + " " + update.getMessage().getText());
 				ConsoleCommandSender sender = Bukkit.getConsoleSender();
@@ -97,7 +103,7 @@ public class TGself extends TelegramLongPollingBot {
 				for(String cmd:commands){
 					long del;
 					try{
-					del = Long.valueOf(cmd.substring(0,cmd.indexOf(":")));
+						del = Long.valueOf(cmd.substring(0,cmd.indexOf(":")));
 					}catch(IllegalArgumentException e){
 						del = 4;
 					}
@@ -125,14 +131,9 @@ public class TGself extends TelegramLongPollingBot {
 				return;
 			}else{
 				Main.debug("not an admin;");
-				
+				return;
 			}
 			
-			try{
-				execute(getid(update));
-			} catch (TelegramApiException e){
-				e.printStackTrace();
-			}
 		}
 	}
 	
@@ -197,7 +198,7 @@ public class TGself extends TelegramLongPollingBot {
 	}
 	public SendMessage getid(Update update){
 		SendMessage message;
-		if ((update.getMessage().hasText()) && (update.getMessage().getText().startsWith("/getid")) && (Main.sendids)){
+		if ((update.getMessage().hasText()) && (update.getMessage().getText().toLowerCase().startsWith("/getid")) && (Main.sendids)){
 			String replace = "`" + update.getMessage().getChatId() + "`";
 			message = new SendMessage().setChatId(update.getMessage().getChatId()).setText((Main.locale.get("getid")).replace("USER_ID", replace).replace("NEW_LINE", System.lineSeparator())).enableMarkdown(true);
 		}else{
