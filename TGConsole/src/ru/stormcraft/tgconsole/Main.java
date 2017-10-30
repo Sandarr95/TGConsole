@@ -44,26 +44,25 @@ public class Main extends JavaPlugin implements Listener {
 	public static String botToken = "resd";
 	public static long delay;
 	public static HashMap<String, String> locale;
-	public static ArrayList<group> groups;
+	public static ArrayList<TGroup> groups;
 	@Override
 	public void onEnable() {
 		tfolder = this.getDataFolder();
 		clearLog();
 		loadConfigs();
     
-		Configos cfg = new Configos();
 		if (getConfig().getBoolean("enabled")){
-			if ((!botName.equals("YOUR_BOT_NAME")) && (!botToken.equals("YOUR_TOKEN_NAME"))) {
+			if ((!botName.equals("YOUR_BOT_NAME")) && (!botToken.equals("YOUR_BOT_TOKEN"))) {
 				try{
 					ApiContextInitializer.init();
 					botsApi = new TelegramBotsApi();
-					bot = new TGself();
+					bot = new TGself(botName,botToken);
 					session = botsApi.registerBot(bot);
 					
 					if(getConfig().getBoolean("notify.enabled")){
 						Bukkit.getPluginManager().registerEvents(this, this);
 					}
-					Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "Starting remote control bot - "+ChatColor.YELLOW+Configos.botName);
+					Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "Starting remote control bot - "+ChatColor.YELLOW+botName);
 					Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "|----------------------------------------|");
 					Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "|  Successfully started the remote bot!  |");
 					Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "|----------------------------------------|");
@@ -217,7 +216,7 @@ public class Main extends JavaPlugin implements Listener {
 		
 		getConfig().options().header(
 				"# # # # # # # # # # # # # # # # # # # # # # # # # # # # #\n"+
-				"                   TGConsole v1.10.3                    #\n"+
+				"                   TGConsole v1.10.1                    #\n"+
 				"# # # # # # # # # # # # # # # # # # # # # # # # # # # # #\n"+
 				"TGConsole: control your server remotely using Telegram! #\n"+
 				"Autor: Azim(t.me/spc_azim),  contact  me  if  you  are  #\n"+
@@ -233,7 +232,7 @@ public class Main extends JavaPlugin implements Listener {
 		admins = getConfig().getStringList("admins");
 		ids = getConfig().getLongList("notify.ids");
 		groups = getGroups("groups");
-		for(group gr:groups){
+		for(TGroup gr:groups){
 			debug(" "+gr.name); //replace with debugs and add functional
 			for(String id:gr.users){ 
 				debug("user : "+id);
@@ -279,31 +278,35 @@ public class Main extends JavaPlugin implements Listener {
 		}
 	}
 	
-	@SuppressWarnings("deprecation")
 	public void reloadCfg(){
 		locale.clear();
 		keyboard.clear();
 		admins.clear();
 		ids.clear();
-		session.close();
+		session.stop();
 		reloadConfig();
 		loadConfigs();
-		bot = new TGself();
+		bot = new TGself(botName,botToken);
 		try {
 			session = botsApi.registerBot(bot);
+			getLogger().info("ALL IS OK! ignore error code above, it's just bot disliking it's shutdown...");
+			getLogger().info("TGConsole  reloaded!");
 		} catch (TelegramApiRequestException e) {
 			e.printStackTrace();
-			
+			getLogger().info("Something went wrong =(");
 		}
-		getLogger().info("ALL IS OK! ignore error code above, it's just bot disliking it's shutdown...");
-		getLogger().info("TGConsole  reloaded!");
+		
 	}
 	
 	
-	public ArrayList<group> getGroups(String section){
-		ArrayList<group> result = new ArrayList<group>();
+	public ArrayList<TGroup> getGroups(String section){
+		ArrayList<TGroup> result = new ArrayList<TGroup>();
 		for (String key : getConfig().getConfigurationSection(section).getKeys(false)){
-			group gr = new group(key,getConfig().getStringList(section+"."+key+".commands"),getConfig().getStringList(section+"."+key+".blocked"),getConfig().getStringList(section+"."+key+".users"));
+			TGroup gr = new TGroup(
+					key,  //group name
+					getConfig().getStringList(section+"."+key+".commands"),  //allowed commands
+					getConfig().getStringList(section+"."+key+".blocked"),   //exclusions from allowed commands
+					getConfig().getStringList(section+"."+key+".users"));    //users of the group
 			result.add(gr);
 		}
 		return result;
@@ -357,7 +360,7 @@ public class Main extends JavaPlugin implements Listener {
 				for(long user_id:ids){
 					SendMessage message = new SendMessage().setChatId(user_id).setText(notify.replaceAll("§.", "")).enableMarkdown(true);
 					try {
-						bot.sendMessage(message);
+						bot.execute(message);
 						Thread.sleep(500);
 					} catch (TelegramApiException | InterruptedException e) {
 						e.printStackTrace();

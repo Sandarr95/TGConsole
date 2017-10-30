@@ -17,16 +17,22 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
 
 public class TGself extends TelegramLongPollingBot {
+	private final String botUsername;
+	private final String botToken;
+	TGself(String botUsername,String botToken){
+		this.botUsername = botUsername;
+		this.botToken = botToken;
+	}
+	
 	@Override
 	public String getBotUsername(){
-		return Configos.botName;
+		return this.botUsername;
 	}
 	@Override
 	public String getBotToken(){
-		return Configos.botToken;
+		return this.botToken;
 	}
   
-	@SuppressWarnings({ "deprecation" })
 	@Override
 	public void onUpdateReceived(Update update){
 		Main.debug("got update;");
@@ -37,7 +43,7 @@ public class TGself extends TelegramLongPollingBot {
 			}
 			if (update.getMessage().getText().startsWith("/getid")) {
 				try{
-					sendMessage(getid(update));
+					execute(getid(update));
 				} catch (TelegramApiException e){
 					e.printStackTrace();
 				}
@@ -48,7 +54,7 @@ public class TGself extends TelegramLongPollingBot {
 				keyboardMarkup.setKeyboard(Main.keyboard);
 				SendMessage message = new SendMessage().setChatId(update.getMessage().getChatId()).setText(Main.locale.get("showMenu")).setReplyMarkup(keyboardMarkup);
 				try {
-					sendMessage(message);
+					execute(message);
 					Thread.sleep(500);
 				} catch (TelegramApiException | InterruptedException e) {
 					e.printStackTrace();
@@ -58,7 +64,7 @@ public class TGself extends TelegramLongPollingBot {
 			if ((update.getMessage().getText().startsWith("/hidemenu")||update.getMessage().getText().startsWith("/hide")) && Main.menu && isAdmin(update)){
 				SendMessage message = new SendMessage().setChatId(update.getMessage().getChatId()).setText(Main.locale.get("hideMenu")).setReplyMarkup(new ReplyKeyboardRemove());
 				try {
-					sendMessage(message);
+					execute(message);
 					Thread.sleep(500);
 				} catch (TelegramApiException | InterruptedException e) {
 					e.printStackTrace();
@@ -81,7 +87,7 @@ public class TGself extends TelegramLongPollingBot {
 					.setChatId(update.getMessage().getChatId())
 					.setText(Main.locale.get("nothingHappened")).enableMarkdown(true);
 					try{
-						sendMessage(message);
+						execute(message);
 						Thread.sleep(500);
 					}catch(InterruptedException|TelegramApiException e){
 						e.printStackTrace();
@@ -123,14 +129,13 @@ public class TGself extends TelegramLongPollingBot {
 			}
 			
 			try{
-				sendMessage(getid(update));
+				execute(getid(update));
 			} catch (TelegramApiException e){
 				e.printStackTrace();
 			}
 		}
 	}
 	
-	@SuppressWarnings("deprecation")
 	public void execmd(String cmd, long delay, ConsoleCommandSender sender, long chat_id){
 		
 		
@@ -177,7 +182,7 @@ public class TGself extends TelegramLongPollingBot {
 				SendMessage message = new SendMessage()
 				.setChatId(chat_id)
 				.setText(part).enableMarkdown(true);
-				sendMessage(message);
+				execute(message);
 				Thread.sleep(500);
 			}
 			
@@ -208,7 +213,7 @@ public class TGself extends TelegramLongPollingBot {
 			Main.debug("is admin");
 			return true;
 		}
-		for(group gr:Main.groups){
+		for(TGroup gr:Main.groups){
 			if(gr.havePermission(update.getMessage().getText(), update.getMessage().getFrom())){
 				Main.debug("is"+ gr.name);
 				return true;

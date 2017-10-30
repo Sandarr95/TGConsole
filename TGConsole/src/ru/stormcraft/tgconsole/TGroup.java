@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.telegram.telegrambots.api.objects.User;
 
-public class group {
+public class TGroup {
 	public String name;
 	public List<String> commands;
 	public List<String> forbidden;
@@ -27,7 +27,7 @@ public class group {
 		return have;
 	}
 
-	public group(String name, List<String> commands,List<String> forbidden, List<String> users) {
+	public TGroup(String name, List<String> commands,List<String> forbidden, List<String> users) {
 		super();
 		this.name = name;
 		this.commands = commands;

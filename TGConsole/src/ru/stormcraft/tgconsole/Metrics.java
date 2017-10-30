@@ -16,10 +16,8 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
@@ -201,11 +199,11 @@ public class Metrics {
      *
      * @return The server specific data.
      */
-    @SuppressWarnings({ "deprecation", "unchecked" })
+    @SuppressWarnings({ "unchecked" })
 	private JSONObject getServerData() {
         // Minecraft specific data
         int playerAmount=0;
-        for(Player p:Bukkit.getOnlinePlayers()){
+        for(@SuppressWarnings("unused") Player p:Bukkit.getOnlinePlayers()){
         	playerAmount++;
         }
         
