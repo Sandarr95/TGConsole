@@ -204,17 +204,11 @@ public class Metrics {
     @SuppressWarnings({ "deprecation", "unchecked" })
 	private JSONObject getServerData() {
         // Minecraft specific data
-        int playerAmount;
-        try {
-            // Around MC 1.8 the return type was changed to a collection from an array,
-            // This fixes java.lang.NoSuchMethodError: org.bukkit.Bukkit.getOnlinePlayers()Ljava/util/Collection;
-            Method onlinePlayersMethod = Class.forName("org.bukkit.Server").getMethod("getOnlinePlayers");
-            playerAmount = onlinePlayersMethod.getReturnType().equals(Collection.class)
-                    ? ((Collection<?>) onlinePlayersMethod.invoke(Bukkit.getServer())).size()
-                    : ((Player[]) onlinePlayersMethod.invoke(Bukkit.getServer())).length;
-        } catch (Exception e) {
-            playerAmount = Bukkit.getOnlinePlayers().length; // Just use the new method if the Reflection failed
+        int playerAmount=0;
+        for(Player p:Bukkit.getOnlinePlayers()){
+        	playerAmount++;
         }
+        
         int onlineMode = Bukkit.getOnlineMode() ? 1 : 0;
         String bukkitVersion = org.bukkit.Bukkit.getVersion();
         bukkitVersion = bukkitVersion.substring(bukkitVersion.indexOf("MC: ") + 4, bukkitVersion.length() - 1);
