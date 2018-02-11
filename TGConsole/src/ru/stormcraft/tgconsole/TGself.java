@@ -78,7 +78,7 @@ public class TGself extends TelegramLongPollingBot {
 				return;
 			}
 			if((update.getMessage().getText().toLowerCase().startsWith("/multiple"))&&isAdmin(update)){
-				Bukkit.getLogger().info(Main.locale.get("User") + " " + update.getMessage().getChat().getFirstName() + " " + update.getMessage().getChat().getLastName() + " @" + update.getMessage().getChat().getUserName());
+				Bukkit.getLogger().info(Main.locale.get("User") + " " + update.getMessage().getFrom().getFirstName() + " " + update.getMessage().getFrom().getLastName() + " @" + update.getMessage().getFrom().getUserName());
 				Bukkit.getLogger().info(Main.locale.get("Action") + " " + update.getMessage().getText());
 				ConsoleCommandSender sender = Bukkit.getConsoleSender();
 				Scanner ms = new Scanner(update.getMessage().getText());
@@ -138,10 +138,6 @@ public class TGself extends TelegramLongPollingBot {
 	}
 	
 	public void execmd(String cmd, long delay, ConsoleCommandSender sender, long chat_id){
-		
-		
-		
-		
 			File templog = new File("templog.txt");
 			TiedOutputStream tos = null;
 			try {

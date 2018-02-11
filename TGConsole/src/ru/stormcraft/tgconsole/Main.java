@@ -122,7 +122,7 @@ public class Main extends JavaPlugin implements Listener {
 			for(long user_id:ids){
 				SendMessage message = new SendMessage().setChatId(user_id).setText(locale.get("notifyShutdown")).enableMarkdown(true);
 				try {
-					bot.sendMessage(message);
+					bot.execute(message);
 					Thread.sleep(500);
 				} catch (TelegramApiException | InterruptedException e) {
 					e.printStackTrace();
@@ -216,7 +216,7 @@ public class Main extends JavaPlugin implements Listener {
 		
 		getConfig().options().header(
 				"# # # # # # # # # # # # # # # # # # # # # # # # # # # # #\n"+
-				"                   TGConsole v1.10.1                    #\n"+
+				"                    TGConsole v1.11                     #\n"+
 				"# # # # # # # # # # # # # # # # # # # # # # # # # # # # #\n"+
 				"TGConsole: control your server remotely using Telegram! #\n"+
 				"Autor: Azim(t.me/spc_azim),  contact  me  if  you  are  #\n"+

@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>TGConsole</groupId>
   <artifactId>TGConsole</artifactId>
-  <version>1.10.1</version>
+  <version>1.12</version>
   
   <repositories>
       <repository>
@@ -14,7 +14,7 @@
 
   <dependencies>
   
-  
+		
       <dependency>
           <groupId>org.telegram</groupId>
           <artifactId>telegrambots</artifactId>
@@ -25,7 +25,8 @@
     		<groupId>org.telegram</groupId>
     		<artifactId>telegrambots-meta</artifactId>
     		<version>3.4</version>
-      </dependency> 
+      </dependency>
+      
       <dependency>
           <groupId>org.bukkit</groupId>
           <artifactId>bukkit</artifactId>
@@ -54,25 +55,25 @@
           <target>1.8</target>
         </configuration>
       </plugin>
-      <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-      <artifactId>maven-shade-plugin</artifactId>
-        <version>3.1.0</version>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>shade</goal>
-            </goals>
-              <configuration>
-                            <minimizeJar>true</minimizeJar>
-				<shadedArtifactAttached>true</shadedArtifactAttached>
-              </configuration>
-              
-              
-              </execution>
-              </executions>
-              </plugin>
-    </plugins>
+      <!-- 
+		<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-shade-plugin</artifactId>
+			<version>3.1.0</version>
+			<executions>
+				<execution>
+					<phase>package</phase>
+					<goals>
+						<goal>shade</goal>
+					</goals>
+					<configuration>
+						<shadedArtifactAttached>true</shadedArtifactAttached>
+						<minimizeJar>true</minimizeJar>
+					</configuration>
+				</execution>
+			</executions>
+		</plugin>
+		-->
+	</plugins>
   </build>
 </project>
