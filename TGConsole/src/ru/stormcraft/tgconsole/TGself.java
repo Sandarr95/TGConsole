@@ -24,6 +24,20 @@ public class TGself extends TelegramLongPollingBot {
 		this.botToken = botToken;
 	}
 	
+	private ArrayList<SendMessage> queue;
+	
+	public void addToQueue(SendMessage msg){
+		this.queue.add(msg);
+	}
+	
+	public SendMessage getFromQueue(){
+		if(this.queue.isEmpty()){
+			return null;
+		}else{
+			return this.queue.remove(0);
+		}
+	}
+	
 	@Override
 	public String getBotUsername(){
 		return this.botUsername;
