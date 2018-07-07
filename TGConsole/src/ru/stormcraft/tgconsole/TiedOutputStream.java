@@ -34,4 +34,8 @@ public class TiedOutputStream extends PrintStream {
 		super.println(args);
 		this.sout.println(args);
 	}
+	
+	public PrintStream getSerr() {
+		return serr;
+	}
 }

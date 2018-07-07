@@ -118,7 +118,7 @@ public class Main extends JavaPlugin implements Listener {
 	@Override
 	public void onDisable() {
 		if(getConfig().getBoolean("notify.sendServerShutdown")){
-			getLogger().info("Sending shutdown messages to admins...");
+			getLogger().info("Sending shutdown messages...");
 			for(long user_id:ids){
 				SendMessage message = new SendMessage().setChatId(user_id).setText(locale.get("notifyShutdown")).enableMarkdown(true);
 				try {
