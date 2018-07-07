@@ -216,7 +216,7 @@ public class Main extends JavaPlugin implements Listener {
 		
 		getConfig().options().header(
 				"# # # # # # # # # # # # # # # # # # # # # # # # # # # # #\n"+
-				"                    TGConsole v1.11                     #\n"+
+				"                    TGConsole v1.20                     #\n"+
 				"# # # # # # # # # # # # # # # # # # # # # # # # # # # # #\n"+
 				"TGConsole: control your server remotely using Telegram! #\n"+
 				"Autor: Azim(t.me/spc_azim),  contact  me  if  you  are  #\n"+
