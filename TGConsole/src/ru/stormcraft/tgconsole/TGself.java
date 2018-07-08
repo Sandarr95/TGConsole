@@ -1,9 +1,5 @@
 package ru.stormcraft.tgconsole;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -15,6 +11,8 @@ import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboardRemove;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
+
+import ru.stormcraft.tgconsole.util.ConsoleUtils;
 
 public class TGself extends TelegramLongPollingBot {
 	private final String botUsername;
@@ -126,7 +124,7 @@ public class TGself extends TelegramLongPollingBot {
 					}
 					del = del*1000;
 					String toexe = cmd.substring(cmd.indexOf(":")+1);
-					execmd(toexe,del,sender,update.getMessage().getChatId());
+					ConsoleUtils.executeCommand(toexe,del,sender,update.getMessage().getChatId(),this);
 					
 				}
 				
@@ -140,8 +138,7 @@ public class TGself extends TelegramLongPollingBot {
 				Bukkit.getLogger().info(Main.locale.get("Action") + " " + update.getMessage().getText());
 				ConsoleCommandSender sender = Bukkit.getConsoleSender();
 				
-				
-				execmd(update.getMessage().getText(), Main.delay, sender, update.getMessage().getFrom().getId());
+				ConsoleUtils.executeCommand(update.getMessage().getText(), Main.delay, sender, update.getMessage().getFrom().getId(), this);
 				return;
 			}else{
 				Main.debug("not an admin;");
@@ -151,61 +148,6 @@ public class TGself extends TelegramLongPollingBot {
 		}
 	}
 	
-	public void execmd(String cmd, long delay, ConsoleCommandSender sender, long chat_id){
-			File templog = new File("templog.txt");
-			TiedOutputStream tos = null;
-			try {
-				tos = new TiedOutputStream(templog);
-			} catch (FileNotFoundException e1) {
-				e1.printStackTrace();
-				return;
-			}
-			PrintStream def = System.out;
-
-			System.setOut(tos);
-		try{
-			Bukkit.getServer().dispatchCommand(sender, cmd);
-			Thread.sleep(delay);
-			System.setOut(def);
-			
-			String result = " " + Main.locale.get("commandOutput") + " `";
-	          
-			Scanner sc = new Scanner(templog);
-			while (sc.hasNextLine()){
-				result = result + System.lineSeparator();
-				result = result + sc.nextLine();
-			}
-			tos.close();
-			sc.close();
-			result = result.replaceAll("[\\[;0-9]+m", " ");
-			ArrayList<String> newStrings = new ArrayList<String>();
-			while (result.length() > 4001){
-				newStrings.add(result.substring(0, 4000));
-				result = "`" + result.substring(4000);
-			}
-			if (result.length() < 4002) {
-				newStrings.add(result);
-			}
-		
-			for (String part : newStrings){
-				part = part + "`";
-    
-				SendMessage message = new SendMessage()
-				.setChatId(chat_id)
-				.setText(part).enableMarkdown(true);
-				execute(message);
-				Thread.sleep(500);
-			}
-			
-			Main.clearLog();
-		
-		}catch(InterruptedException|SecurityException|IOException | TelegramApiException e){
-			e.printStackTrace();
-			try{
-				tos.close();
-			}catch(Exception ignored){ }
-		}
-	}
 	public SendMessage getid(Update update){
 		SendMessage message;
 		if ((update.getMessage().hasText()) && (update.getMessage().getText().toLowerCase().startsWith("/getid")) && (Main.sendids)){

@@ -134,7 +134,7 @@ public class Main extends JavaPlugin implements Listener {
 		getLogger().info("Disabled TGConsole!");
 	}
   
-	static void clearLog() {
+	public static void clearLog() {
 		try{
 			String pat = tfolder.getAbsolutePath().replace("\\" + tfolder.getPath(), "");
 			File folder = new File(pat);
