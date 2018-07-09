@@ -1,4 +1,4 @@
-package ru.stormcraft.tgconsole;
+package ru.stormcraft.tgconsole.util;
 
 import java.util.List;
 

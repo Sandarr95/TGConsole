@@ -13,6 +13,7 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
 
 import ru.stormcraft.tgconsole.util.ConsoleUtils;
+import ru.stormcraft.tgconsole.util.Permissions;
 
 public class TGself extends TelegramLongPollingBot {
 	private final String botUsername;
@@ -64,7 +65,7 @@ public class TGself extends TelegramLongPollingBot {
 			if ((update.getMessage().getText().toLowerCase().startsWith("/showmenu")
 					||update.getMessage().getText().toLowerCase().startsWith("/show"))
 					&& Main.menu
-					&& isAdmin(update)){
+					&& Permissions.isAdmin(update)){
 				ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
 				keyboardMarkup.setKeyboard(Main.keyboard);
 				SendMessage message = new SendMessage().setChatId(update.getMessage().getChatId()).setText(Main.locale.get("showMenu")).setReplyMarkup(keyboardMarkup);
@@ -79,7 +80,7 @@ public class TGself extends TelegramLongPollingBot {
 			if ((update.getMessage().getText().toLowerCase().startsWith("/hidemenu")
 					||update.getMessage().getText().toLowerCase().startsWith("/hide"))
 					&& Main.menu
-					&& isAdmin(update)){
+					&& Permissions.isAdmin(update)){
 				SendMessage message = new SendMessage().setChatId(update.getMessage().getChatId()).setText(Main.locale.get("hideMenu")).setReplyMarkup(new ReplyKeyboardRemove());
 				try {
 					execute(message);
@@ -89,7 +90,7 @@ public class TGself extends TelegramLongPollingBot {
 				}
 				return;
 			}
-			if((update.getMessage().getText().toLowerCase().startsWith("/multiple"))&&isAdmin(update)){
+			if((update.getMessage().getText().toLowerCase().startsWith("/multiple"))&&Permissions.isAdmin(update)){
 				Bukkit.getLogger().info(Main.locale.get("User") + " " + update.getMessage().getFrom().getFirstName() + " " + update.getMessage().getFrom().getLastName() + " @" + update.getMessage().getFrom().getUserName());
 				Bukkit.getLogger().info(Main.locale.get("Action") + " " + update.getMessage().getText());
 				ConsoleCommandSender sender = Bukkit.getConsoleSender();
@@ -132,8 +133,7 @@ public class TGself extends TelegramLongPollingBot {
 			
 			}
 			
-			
-			if (havePerms(update)){
+			if (Permissions.havePerms(update)){
 				Bukkit.getLogger().info(Main.locale.get("User") + " " + update.getMessage().getFrom().getFirstName() + " " + update.getMessage().getFrom().getLastName() + " @" + update.getMessage().getFrom().getUserName());
 				Bukkit.getLogger().info(Main.locale.get("Action") + " " + update.getMessage().getText());
 				ConsoleCommandSender sender = Bukkit.getConsoleSender();
@@ -158,21 +158,4 @@ public class TGself extends TelegramLongPollingBot {
 		}
 		return message;
 	}
-	public boolean isAdmin(Update update){
-		return (Main.admins.contains( update.getMessage().getFrom().getId().toString()) || Main.admins.contains(update.getMessage().getFrom().getUserName()) || Main.admins.contains("@"+update.getMessage().getFrom().getUserName()));
-	}
-	public boolean havePerms(Update update){
-		if(isAdmin(update)){
-			Main.debug("is admin");
-			return true;
-		}
-		for(TGroup gr:Main.groups){
-			if(gr.havePermission(update.getMessage().getText(), update.getMessage().getFrom())){
-				Main.debug("is"+ gr.name);
-				return true;
-			}
-		}
-		return false;
-	}
-	
 }

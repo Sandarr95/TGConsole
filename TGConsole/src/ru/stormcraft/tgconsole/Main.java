@@ -29,8 +29,10 @@ import org.telegram.telegrambots.exceptions.TelegramApiException;
 import org.telegram.telegrambots.exceptions.TelegramApiRequestException;
 import org.telegram.telegrambots.generics.BotSession;
 
+import ru.stormcraft.tgconsole.util.TGroup;
+
 public class Main extends JavaPlugin implements Listener {
-	static List<String> admins;
+	public static List<String> admins;
 	static List<Long> ids;
 	static boolean sendids = true;
 	static boolean debug;
