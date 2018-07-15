@@ -221,9 +221,11 @@ public class Main extends JavaPlugin implements Listener {
 				"                    TGConsole v1.20                     #\n"+
 				"# # # # # # # # # # # # # # # # # # # # # # # # # # # # #\n"+
 				"TGConsole: control your server remotely using Telegram! #\n"+
-				"Autor: Azim(t.me/spc_azim),  contact  me  if  you  are  #\n"+
-				"  having troubles with this plugin,                     #\n"+
-				"                    i will do my best to help you =)    #\n"+
+				"                      Autor: Azim                       #\n"+
+				"contact me if you are having troubles with this plugin, #\n"+
+				"                  i will do my best to help you =)      #\n"+
+				"                                                        #\n"+
+				" Telegram: t.me/SPC_Azim            Discord: Azim#6620  #\n"+
 				"# # # # # # # # # # # # # # # # # # # # # # # # # # # # #"
 				).
 		copyDefaults(true);
@@ -308,7 +310,7 @@ public class Main extends JavaPlugin implements Listener {
 					key,  //group name
 					getConfig().getStringList(section+"."+key+".commands"),  //allowed commands
 					getConfig().getStringList(section+"."+key+".blocked"),   //exclusions from allowed commands
-					getConfig().getStringList(section+"."+key+".users"));    //users of the group
+					getConfig().getStringList(section+"."+key+".users"), keyboard);    //users of the group
 			result.add(gr);
 		}
 		return result;
