@@ -2,6 +2,7 @@ package ru.stormcraft.tgconsole.util;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 import org.bukkit.Bukkit;
 import org.bukkit.command.ConsoleCommandSender;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
@@ -17,7 +18,7 @@ public class ConsoleUtils {
 		PrintStream def = System.out;
 		System.setOut(zps);
 		try {
-			if(Bukkit.getScheduler().callSyncMethod( this, () -> Bukkit.getServer().dispatchCommand( sender, command ) ).get()) {
+			if(Bukkit.getScheduler().callSyncMethod( Main.getInstance(), () -> Bukkit.getServer().dispatchCommand( sender, cmd ) ).get()) {
 				Thread.sleep(delay);
 				System.setOut(def);
 				String result = " " + Main.locale.get("commandOutput") + " `";
@@ -48,7 +49,7 @@ public class ConsoleUtils {
 
 				Main.clearLog();
 			}
-		} catch(InterruptedException|SecurityException|TelegramApiException e) {
+		} catch(InterruptedException|SecurityException|TelegramApiException|ExecutionException e) {
 			e.printStackTrace();
 			try{
 				zps.close();

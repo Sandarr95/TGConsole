@@ -29,6 +29,9 @@ import org.telegram.telegrambots.exceptions.TelegramApiException;
 import org.telegram.telegrambots.exceptions.TelegramApiRequestException;
 import org.telegram.telegrambots.generics.BotSession;
 
+import org.bukkit.plugin.java.JavaPluginLoader;
+import org.bukkit.plugin.PluginDescriptionFile;
+
 import ru.stormcraft.tgconsole.util.TGroup;
 
 public class Main extends JavaPlugin implements Listener {
@@ -47,6 +50,20 @@ public class Main extends JavaPlugin implements Listener {
 	public static long delay;
 	public static HashMap<String, String> locale;
 	public static ArrayList<TGroup> groups;
+
+  private static Main instance;
+	public Main(){
+		super();
+		instance = this;
+	}
+	public Main(JavaPluginLoader loader, PluginDescriptionFile description, File dataFolder, File file){
+		super(loader, description, dataFolder, file);
+		instance = this;
+	}
+	public static Main getInstance(){
+		return instance;
+	}
+
 	@Override
 	public void onEnable() {
 		tfolder = this.getDataFolder();
