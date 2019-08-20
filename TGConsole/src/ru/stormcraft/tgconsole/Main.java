@@ -88,7 +88,7 @@ public class Main extends JavaPlugin implements Listener {
 					if(getConfig().getBoolean("notify.sendServerStart")&&getConfig().getBoolean("notify.enabled")){
 						sendAll(bot,locale.get("notifyStart"),this);
 					}
-					if(getConfig().getBoolean("share_stats")){
+					if(false && getConfig().getBoolean("share_stats")){
 						Metrics metrics = new Metrics(this);
 						metrics.addCustomChart(new Metrics.SimplePie("notify_usage", new Callable<String>() {
 			            	@Override
@@ -111,9 +111,11 @@ public class Main extends JavaPlugin implements Listener {
 			            	}
 			        	}));
 					}else{
+						/*
 						Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "#  WARNING:  #");
 						Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "You are not sharing stats with developer!");
 						Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "That makes him sad :.( ");
+						*/
 					}
 					Bukkit.getConsoleSender().sendMessage(ChatColor.YELLOW+"TGConsole is up and running,"+ChatColor.GREEN+" all is OK! :)");
 					
