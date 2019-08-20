@@ -17,8 +17,7 @@ public class ConsoleUtils {
 		PrintStream def = System.out;
 		System.setOut(zps);
 		try {
-			boolean success = Bukkit.getScheduler().callSyncMethod( this, () -> Bukkit.getServer().dispatchCommand( sender, command ) ).get();
-			if(success) {
+			if(Bukkit.getScheduler().callSyncMethod( this, () -> Bukkit.getServer().dispatchCommand( sender, command ) ).get()) {
 				Thread.sleep(delay);
 				System.setOut(def);
 				String result = " " + Main.locale.get("commandOutput") + " `";
